@@ -1,0 +1,16 @@
+certifi==2018.8.24
+chardet==3.0.4
+cycler==0.10.0
+elasticsearch==6.3.1
+elasticsearch-dsl==6.2.1
+idna==2.7
+ipaddress==1.0.22
+kiwisolver==1.0.1
+matplotlib==3.0.0
+numpy==1.15.1
+pyparsing==2.2.1
+python-dateutil==2.7.3
+requests==2.19.1
+scipy==1.1.0
+six==1.11.0
+urllib3==1.23
