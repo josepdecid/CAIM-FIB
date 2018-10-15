@@ -47,7 +47,7 @@ def generate_documents_list(files, index):
             '_op_type': 'index',
             '_index': index,
             '_type': 'document',
-            'path': file[0],
+            'path': file,
             'text': reduce(lambda x, y: x + y, codecs.open(file, 'r', encoding='iso-8859-1'), '')
         })
     return documents
@@ -64,19 +64,18 @@ def insert_document_to_index(documents, text_an, index, keep):
 
     if not idx.exists():
         print('Creating index')
-        idx.settings(number_of_shards=1)
         idx.create()
 
-    index.close()
-    index.analyzer(text_an)
+    idx.close()
+    idx.analyzer(text_an)
 
     client.indices.put_mapping(doc_type='document', index=index,
                                body={'document': {'properties': {'path': {'type': 'keyword'}}}})
 
-    index.save()
-    index.open()
+    idx.save()
+    idx.open()
 
-    print("Index settings=", index.get_settings())
+    print("Index settings=", idx.get_settings())
     print('Indexing ...')
     bulk(client, documents)
 
@@ -87,10 +86,11 @@ if __name__ == '__main__':
     parser.add_argument('--index', required=True, default=None, help='Index for the files')
     parser.add_argument('--token', default='standard', choices=TOKENIZER_CHOICES, help='Text tokenizer')
     parser.add_argument('--filter', default=['lowercase'], nargs=argparse.REMAINDER, help='Text filters')
+    parser.add_argument('--keep', required=False, default=False, help='Remove index if already exists')
     args = parser.parse_args()
 
     validate_filters(args.filter)
     list_files = generate_files_list(args.path)
     list_documents = generate_documents_list(list_files, args.index)
-    text_analyzer = analyzer('default', type='custom', tokenizer=tokenizer(args.token), filter=args.filters)
+    text_analyzer = analyzer('default', type='custom', tokenizer=tokenizer(args.token), filter=args.filter)
     insert_document_to_index(list_documents, text_analyzer, args.index, args.keep)
