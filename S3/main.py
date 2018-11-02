@@ -15,11 +15,11 @@ if __name__ == '__main__':
     rocchio = Rocchio()
 
     param_grid = {
-        'alpha': np.arange(1, 9, 1),
-        'beta': np.arange(1, 9, 1),
-        'n_rounds': np.arange(1, 42, 10),
-        'k': np.arange(5, 25, 5),
-        'r': np.arange(2, 10, 2),
+        'alpha': map(float, np.arange(0.1, 2, 0.05)),
+        'beta': map(float, np.arange(0.1, 2, 0.05)),
+        'n_rounds': map(int, np.arange(1, 20, 1)),
+        'k': map(int, np.arange(1, 30, 3)),
+        'r': map(int, np.arange(2, 10, 2)),
         'query': [
             ['toronto', 'caim'],
             ['toronto^2', 'nyc'],
@@ -31,7 +31,6 @@ if __name__ == '__main__':
     params = ParameterGrid(param_grid)
 
     for p in params:
-        p = {key: int(val) if key != 'query' else val for key, val in p.items()}
         print(str(datetime.now()) + ' ' + json.dumps(p))
         rocchio.update_parameters(alpha=p['alpha'],
                                   beta=p['beta'],
