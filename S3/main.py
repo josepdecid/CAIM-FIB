@@ -1,19 +1,25 @@
 import json
+from datetime import datetime
 
 import numpy as np
-
-from S3.Rocchio import Rocchio
 from sklearn.model_selection import ParameterGrid
 
+from S3.Rocchio import Rocchio
+
+FILE_NAME = 'results.json'
+
 if __name__ == '__main__':
+    with open(FILE_NAME, mode='w') as f:
+        f.write('[')
+
     rocchio = Rocchio()
 
     param_grid = {
-        'alpha': np.arange(1, 50, 2),
-        'beta': np.arange(1, 50, 2),
-        'n_rounds': np.arange(1, 100, 10),
-        'k': np.arange(5, 50, 5),
-        'r': np.arange(2, 11),
+        'alpha': np.arange(1, 9, 1),
+        'beta': np.arange(1, 9, 1),
+        'n_rounds': np.arange(1, 42, 10),
+        'k': np.arange(5, 25, 5),
+        'r': np.arange(2, 10, 2),
         'query': [
             ['toronto', 'caim'],
             ['toronto^2', 'nyc'],
@@ -24,24 +30,25 @@ if __name__ == '__main__':
 
     params = ParameterGrid(param_grid)
 
-    experiments = []
     for p in params:
-        print(p)
+        p = {key: int(val) if key != 'query' else val for key, val in p.items()}
+        print(str(datetime.now()) + ' ' + json.dumps(p))
         rocchio.update_parameters(alpha=p['alpha'],
                                   beta=p['beta'],
                                   n_rounds=p['n_rounds'],
-                                  k=int(p['k']),
+                                  k=p['k'],
                                   r=p['r'])
         results = rocchio.query('news', p['query'])
-        experiments.append({
-            'parameters': {
-                'alpha': int(p['alpha']),
-                'beta': int(p['beta']),
-                'n_rounds': int(p['n_rounds']),
-                'k': int(p['k']),
-                'r': int(p['r']),
-            }, 'results': results
-        })
+        with open(FILE_NAME, mode='a') as f:
+            f.write(json.dumps({
+                'parameters': {
+                    'alpha': p['alpha'],
+                    'beta': p['beta'],
+                    'n_rounds': p['n_rounds'],
+                    'k': p['k'],
+                    'r': p['r'],
+                }, 'results': results
+            }) + ',')
 
-    with open('results.json', mode='w') as f:
-        f.write(json.dumps(experiments))
+    with open(FILE_NAME, mode='a') as f:
+        f.write(']')

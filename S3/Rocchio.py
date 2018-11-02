@@ -16,13 +16,12 @@ class Rocchio:
         self.r = 5
 
     @staticmethod
-    def __add_term_vectors(x, y):
-        for k, v in y.items():
-            if k in x:
-                x[k] += v
+    def __add_term_vectors(source, addition):
+        for k, v in addition.items():
+            if k in source:
+                source[k] += v
             else:
-                x[k] = v
-        return x
+                source[k] = v
 
     @staticmethod
     def __query_to_term_vector(query):
@@ -115,11 +114,13 @@ class Rocchio:
             q.update((k, v * self.alpha) for k, v in q.items())
 
             # beta * sum(docs)
-            sum_relevant_documents = reduce(Rocchio.__add_term_vectors, relevant_term_vectors)
+            sum_relevant_documents = {}
+            for rel in relevant_term_vectors:
+                Rocchio.__add_term_vectors(source=sum_relevant_documents, addition=rel)
             sum_relevant_documents.update((k, self.beta * np.array(v) / len(sum_relevant_documents)) for k, v in
                                           sum_relevant_documents.items())
 
-            q = Rocchio.__add_term_vectors(q, sum_relevant_documents)
+            Rocchio.__add_term_vectors(q, sum_relevant_documents)
             q = self.__prune_query(q)
             q = Rocchio.__normalize(q)
             query = Rocchio.__term_vector_to_query(q)
