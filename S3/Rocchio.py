@@ -17,51 +17,32 @@ class Rocchio:
 
     @staticmethod
     def __add_term_vectors(x, y):
-        i, j = 0, 0
-        terms_x, weights_x = zip(*x)
-        terms_y, weights_y = zip(*y)
-        new_terms, new_weights = [], []
-        while i < len(x) and j < len(y):
-            if terms_x[i] < terms_y[j]:
-                new_terms.append(terms_x[i])
-                new_weights.append(weights_x[i])
-                i += 1
-            elif terms_x[i] > terms_y[j]:
-                new_terms.append(terms_y[j])
-                new_weights.append(weights_y[j])
-                j += 1
+        for k, v in y.items():
+            if k in x:
+                x[k] += v
             else:
-                new_terms.append(terms_x[i])
-                new_weights.append(weights_x[i] + weights_y[j])
-                i += 1
-                j += 1
-
-        if i < len(x):
-            new_terms.extend(terms_x[i:])
-            new_weights.extend(weights_x[i:])
-        if j < len(y):
-            new_terms.extend(terms_y[j:])
-            new_weights.extend(weights_y[j:])
-
-        return list(zip(new_terms, new_weights))
+                x[k] = v
+        return x
 
     @staticmethod
     def __query_to_term_vector(query):
-        def set_term_weights(word):
-            s = word.split('^')
-            return (word, 1) if len(s) == 1 else (s[0], float(s[1]))
-
-        return list(map(set_term_weights, query))
+        query_tw = {}
+        for term in query:
+            s = term.split('^')
+            if len(s) == 1:
+                query_tw[term] = 1
+            else:
+                query_tw[s[0]] = float(s[1])
+        return query_tw
 
     @staticmethod
     def __term_vector_to_query(tw):
-        return list(map(lambda x: x[0] + '^' + str(x[1]), tw))
+        return list(map(lambda x: x[0] + '^' + str(x[1]), tw.items()))
 
     @staticmethod
     def __normalize(tw):
-        terms, weights = zip(*tw)
-        normalized_weights = weights / np.linalg.norm(weights)
-        return list(zip(terms, normalized_weights))
+        norm = np.linalg.norm(list(tw.values()))
+        return {k: w / norm for k, w in tw.items()}
 
     @staticmethod
     def __to_tf_idf(client, index, file_id):
@@ -85,18 +66,19 @@ class Rocchio:
         max_freq = max([f for _, f in term_frequency])
         document_count = int(CatClient(client).count(index=[index], format='json')[0]['count'])
 
-        vector = list(map(tf_idf, zip(term_frequency, document_appearances)))
+        vector = dict(map(tf_idf, zip(term_frequency, document_appearances)))
         return Rocchio.__normalize(vector)
 
     def __prune_query(self, q):
+        q = list(q.items())
         p = q[0:self.r]
-        p.sort(key=lambda el: el[1])
+        p.sort(key=lambda el: el[1], reverse=True)
         for i in range(self.r, len(q)):
             for j in range(0, self.r):
                 if q[i][1] > p[j][1]:
                     p.insert(j, q[i])
                     break
-        return p[0:self.r]
+        return dict(p[0:self.r])
 
     @staticmethod
     def __store_results(query, documents):
@@ -117,41 +99,29 @@ class Rocchio:
 
     def query(self, index, query):
         result = []
-        documents = None
 
         q = Rocchio.__query_to_term_vector(query)
-        q.sort(key=lambda el: el[0])
         client = Elasticsearch()
 
         for it in range(self.n_rounds):
-            docs = execute_query(index, query, self.k)
-            if len(docs) == 0:
-                if documents is None:
-                    print('No documents found!')
-                    return
-                else:
-                    break
-            else:
-                documents = docs
+            documents = execute_query(index, query, self.k)
+            if len(documents) == 0:
+                break
 
             result.append(Rocchio.__store_results(query, documents))
             relevant_term_vectors = list(map(lambda doc: Rocchio.__to_tf_idf(client, index, doc.meta.id), documents))
 
             # alpha * query
-            terms, weights = zip(*q)
-            weights = (self.alpha * np.array(weights)).tolist()
-            old = list(zip(terms, weights))
+            q.update((k, v * self.alpha) for k, v in q.items())
 
             # beta * sum(docs)
             sum_relevant_documents = reduce(Rocchio.__add_term_vectors, relevant_term_vectors)
-            terms, weights = zip(*sum_relevant_documents)
-            weights = (self.beta * np.array(weights) / len(sum_relevant_documents)).tolist()
-            relevant = list(zip(terms, weights))
+            sum_relevant_documents.update((k, self.beta * np.array(v) / len(sum_relevant_documents)) for k, v in
+                                          sum_relevant_documents.items())
 
-            q = Rocchio.__add_term_vectors(old, relevant)
+            q = Rocchio.__add_term_vectors(q, sum_relevant_documents)
             q = self.__prune_query(q)
             q = Rocchio.__normalize(q)
-            q.sort(key=lambda el: el[0])
             query = Rocchio.__term_vector_to_query(q)
 
         documents = execute_query(index, query, self.k)

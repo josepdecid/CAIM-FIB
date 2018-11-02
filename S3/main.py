@@ -13,19 +13,26 @@ if __name__ == '__main__':
         'beta': np.arange(1, 50, 2),
         'n_rounds': np.arange(1, 100, 10),
         'k': np.arange(5, 50, 5),
-        'r': np.arange(2, 11)
+        'r': np.arange(2, 11),
+        'query': [
+            ['toronto', 'caim'],
+            ['toronto^2', 'nyc'],
+            ['toronto', 'vancouv^2'],
+            ['doctor', 'student^8']
+        ]
     }
 
     params = ParameterGrid(param_grid)
 
     experiments = []
     for p in params:
+        print(p)
         rocchio.update_parameters(alpha=p['alpha'],
                                   beta=p['beta'],
                                   n_rounds=p['n_rounds'],
                                   k=int(p['k']),
                                   r=p['r'])
-        results = rocchio.query('news', ['toronto', 'vancouv^2'])
+        results = rocchio.query('news', p['query'])
         experiments.append({
             'parameters': {
                 'alpha': int(p['alpha']),
