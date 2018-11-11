@@ -1,23 +1,9 @@
-#!/usr/bin/python
-
 from __future__ import print_function
 from collections import namedtuple
 import time
 import sys
 from Edge import Edge
 from Airport import Airport
-
-
-class Airport:
-    def __init__(self, iden=None, name=None):
-        self.code = iden
-        self.name = name
-        self.routes = []
-        self.routeHash = dict()
-        self.outweight = ...  # write appropriate value
-
-    def __repr__(self):
-        return "{0}\t{2}\t{1}".format(self.code, self.name, self.pageIndex)
 
 
 edgeList = []  # list of Edge
@@ -63,7 +49,7 @@ def outputPageRanks():
     # write your code
 
 
-def main(argv=None):
+if __name__ == "__main__":
     readAirports("airports.txt")
     readRoutes("routes.txt")
     # time1 = time.time()
@@ -72,7 +58,3 @@ def main(argv=None):
     # outputPageRanks()
     # print("#Iterations:", iterations)
     # print("Time of computePageRanks():", time2-time1)
-
-
-if __name__ == "__main__":
-    sys.exit(main())
