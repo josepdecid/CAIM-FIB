@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 
 from Edge import Edge
@@ -12,39 +14,47 @@ LAMBDA = 0.9
 
 
 def calculate_weight(p, edges):
-    weights = np.zeros(len(edges))
-    out_weights = np.zeros(len(edges))
-    for index, edge in enumerate(edges):
-        weights[index] = edge.weight
-        out_weights[index] = airports_hash[edge.origin].out_weight
+    weight = 0.0
+    for edge in edges:
+        origin_airport = airports_hash[edge.origin]
+        value = p[origin_airport.index]
+        value *= edge.weight
+        value /= origin_airport.out_weight
+        weight += value
+    return weight
 
 
-def compute_page_ranks(airports_list, edge_list, edge_hash):
+def compute_page_ranks():
     n = len(airports_hash)
-    airports_list[0].rank = 1
+    p = np.ones(n, dtype=float)
+    p /= n  # Initial 1/n vector
     i, diff = 0, 1
-    while i < MAX_ITERATIONS and diff < EPSILON:
+    while i < MAX_ITERATIONS and diff >= EPSILON:
+        i += 1
         q = np.zeros(n)
-        for j in range(n):
-            edges = airports_list[j].routes
-            edges_weights = np.array(list(map(lambda e: e.weight, edges)))
-            out_weights = np.array(list(map(lambda e: airports_hash[e.origin].out_weight, edges)))
-            q[j] = LAMBDA * (p[j] * edges_weights / out_weights) + (1 - LAMBDA)/n
+        for _, airport in airports_hash.items():
+            q[airport.index] = LAMBDA * calculate_weight(p, airport.routes) + (1 - LAMBDA) / n
+        diff = np.sum(abs(p - q))
+        p = q
+        print(np.sum(p))
+    return p, i
 
 
-def output_page_ranks():
-    airports_list = list(airports_hash.items())
-    airports_list.sort(key=lambda kv: kv[1].rank, reverse=True)
-    for _, airport in airports_list:
-        print('{} ({}): {}'.format(airport.name, airport.code, airport.rank))
+def output_page_ranks(ranks):
+    results = []
+    for _, airport in airports_hash.items():
+        results.append((airport.name, airport.code, ranks[airport.index]))
+    results.sort(key=lambda res: res[2], reverse=True)
+    for name, code, rank in results:
+        print('{} ({}): {}'.format(name, code, rank))
 
 
 if __name__ == '__main__':
     airports_hash = Airport.read_airports(AIRPORTS_FILE)
-    edge_list, edge_hash = Edge.read_routes(ROUTES_FILE, airports_hash)
-    # time1 = time.time()
-    # iterations = computePageRanks()
-    # time2 = time.time()
-    output_page_ranks()
-    # print("#Iterations:", iterations)
-    # print("Time of computePageRanks():", time2-time1)
+    Edge.read_routes(ROUTES_FILE, airports_hash)
+    time1 = time.time()
+    page_ranks, iterations = compute_page_ranks()
+    time2 = time.time()
+    output_page_ranks(page_ranks)
+    print('#Iterations: ', iterations)
+    print('Time of computePageRanks(): ', time2 - time1)

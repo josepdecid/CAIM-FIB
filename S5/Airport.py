@@ -19,7 +19,7 @@ class Airport:
         airports_hash: Dict[str, Airport] = {}  # hash key IATA code -> Airport
         count = 0
 
-        print('Reading Airport file from {0}'.format(path))
+        print('Reading Airport file from {}'.format(path))
         with open(path, mode='r', encoding='utf8') as f:
             for line in f.readlines():
                 s = line.split(',')
@@ -28,11 +28,15 @@ class Airport:
 
                 name = s[1][1:-1] + ', ' + s[3][1:-1]
                 iata_code = s[4][1:-1]
+
+                if iata_code in airports_hash:
+                    continue  # Airport with this IATA code is duplicated (omit replica)
+
                 a = Airport(index=count, name=name, iata=iata_code)
 
                 airports_hash[a.code] = a
 
                 count += 1
-        print('There were {0} Airports with IATA code'.format(count))
+        print('There were {} Airports with IATA code'.format(count))
 
         return airports_hash
