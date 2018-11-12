@@ -1,4 +1,6 @@
 import re
+from random import random
+from typing import Dict
 
 
 class Airport:
@@ -6,16 +8,16 @@ class Airport:
         self.code = iata
         self.name = name
         self.routes = []
-        self.route_hash = dict()
+        self.route_hash = {}
         self.out_weight = 1  # write appropriate value
+        self.rank = random()
 
     def __repr__(self):
-        return "{0}\t{2}\t{1}".format(self.code, self.name, self.pageIndex)
+        return "{0}\t{1}".format(self.code, self.name)
 
     @staticmethod
     def read_airports(path):
-        airport_list = []  # list of Airport
-        airport_hash = {}  # hash key IATA code -> Airport
+        airport_hash: Dict[str, Airport] = {}  # hash key IATA code -> Airport
 
         print('Reading Airport file from {0}'.format(path))
         with open(path, mode='r', encoding='utf8') as f:
@@ -26,13 +28,13 @@ class Airport:
                     continue  # Invalid or missing IATA code
 
                 a = Airport()
-                a.name = s[1][1:-1] + ", " + s[3][1:-1]
+                a.index = cont
+                a.name = s[1][1:-1] + ', ' + s[3][1:-1]
                 a.code = s[4][1:-1]
 
-                airport_list.append(a)
                 airport_hash[a.code] = a
 
                 cont += 1
         print('There were {0} Airports with IATA code'.format(cont))
 
-        return airport_list, airport_hash
+        return airport_hash
