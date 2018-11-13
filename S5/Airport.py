@@ -24,13 +24,12 @@ class Airport:
         print('Reading Airport file from {0}'.format(path))
         with open(path, mode='r', encoding='utf8') as f:
             cont = 0
-            for line in f.readlines():
+            lines = f.read().splitlines()
+            for line in lines:
                 s = line.split(',')
-                if not re.match('"[A-Z]{3}"', s[4]):
-                    continue  # Invalid or missing IATA code
-                a = Airport(iata=s[4][1:-1],
-                            name=s[1][1:-1] + ", " + s[3][1:-1])
-                airports_hash[a.code] = a
+                airports_hash[s[2]] = Airport(
+                    iata=s[2], name=s[0] + ', ' + s[1]
+                )
                 cont += 1
         print('There were {} Airports with IATA code'.format(cont))
         return airports_hash
@@ -41,12 +40,16 @@ class Airport:
         print('Reading Routes file from {0}'.format(path))
         with open(path, mode='r', encoding='utf8') as f:
             cont = 0
-            for line in f.readlines():
+            lines = f.read().splitlines()
+            for line in lines:
                 s = line.split(',')
-                if not (re.match('[A-Z]{3}', s[2]) and re.match('[A-Z]{3}', s[4])):
+
+                origin = s[0]
+                destination = s[1]
+
+                if not (re.match('[A-Z]{3}', origin) and re.match('[A-Z]{3}', destination)):
                     continue  # Invalid or missing IATA code
-                origin = s[2]
-                destination = s[4]
+
                 if not (origin in airports_hash and destination in airports_hash):
                     continue
                 # If not existing route, init

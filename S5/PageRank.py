@@ -3,7 +3,7 @@ import sys
 from Airport import Airport
 
 AIRPORTS_FILE = 'airports_filtered.txt'
-ROUTES_FILE = 'routes.txt'
+ROUTES_FILE = 'routes_filtered.txt'
 
 EPSILON = 1e-8
 PRECISION = 5e-2
