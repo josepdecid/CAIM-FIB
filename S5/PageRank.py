@@ -1,60 +1,95 @@
 import time
-
-import numpy as np
-
-from Edge import Edge
+import sys
 from Airport import Airport
 
 AIRPORTS_FILE = 'airports_filtered.txt'
 ROUTES_FILE = 'routes.txt'
 
-MAX_ITERATIONS = 100
-EPSILON = 1e-3
-LAMBDA = 0.9
+EPSILON = 1e-8
+PRECISION = 5e-2
+MAX_ITERATIONS = 1000
+LAMBDA = 0.8
 
 
-def calculate_weight(p, edges):
+def init_ranks():
+    for k in airports_hash:
+        airports_hash[k].rank = 1/n
+
+
+def update_ranks():
+    for k in airports_hash:
+        airports_hash[k].update_ranks()
+
+
+def check_similarity_ranks():
+    for airport in airports_hash.values():
+        if abs(airport.rank - airport.new_rank) > EPSILON:
+            return False
+    return True
+
+
+def check_sum():
+    sum = 0
+    for airport in airports_hash.values():
+        sum += airport.rank
+    return abs(1 - sum) < PRECISION
+
+
+def calculate_sink_sum():
+    return sum([airports_hash[k].rank for k in airports_sink])
+
+
+def calculate_weight(airport):
     weight = 0.0
-    for edge in edges:
-        origin_airport = airports_hash[edge.origin]
-        value = p[origin_airport.index]
-        value *= edge.weight
+    for origin, edge_weight in airport.routes.items():
+        origin_airport = airports_hash[origin]
+        value = origin_airport.rank
+        value *= edge_weight
         value /= origin_airport.out_weight
         weight += value
     return weight
 
 
 def compute_page_ranks():
-    n = len(airports_hash)
-    p = np.ones(n, dtype=float)
-    p /= n  # Initial 1/n vector
-    i, diff = 0, 1
-    while i < MAX_ITERATIONS and diff >= EPSILON:
-        i += 1
-        q = np.zeros(n)
-        for _, airport in airports_hash.items():
-            q[airport.index] = LAMBDA * calculate_weight(p, airport.routes) + (1 - LAMBDA) / n
-        diff = np.sum(abs(p - q))
-        p = q
-        print(np.sum(p))
-    return p, i
+    init_ranks()
+    # print('sum == 1? ', check_sum())
+    iterations = 0
+    while iterations < MAX_ITERATIONS:
+        iterations += 1
+        sink_value = calculate_sink_sum()
+        for k, airport in airports_hash.items():
+            airports_hash[k].new_rank = LAMBDA
+            airports_hash[k].new_rank *= calculate_weight(airport)
+            airports_hash[k].new_rank += (1 - LAMBDA + LAMBDA*sink_value)/n
+        if check_similarity_ranks():
+            break
+        update_ranks()
+        # print('sum == 1? ', check_sum())
+    return iterations
 
 
-def output_page_ranks(ranks):
-    results = []
-    for _, airport in airports_hash.items():
-        results.append((airport.name, airport.code, ranks[airport.index]))
-    results.sort(key=lambda res: res[2], reverse=True)
-    for name, code, rank in results:
-        print('{} ({}): {}'.format(name, code, rank))
+def output_page_ranks():
+    results = list(airports_hash.values())
+    results.sort(key=lambda res: res.rank, reverse=True)
+    for elem in results:
+        print('{} ({}): {}\n'.format(elem.name, elem.code, elem.rank))
+
+
+def output_page_ranks_file(path):
+    with open(path, mode='w', encoding='utf8') as f:
+        results = list(airports_hash.values())
+        results.sort(key=lambda res: res.rank, reverse=True)
+        for elem in results:
+            f.write('{} ({}): {}\n'.format(elem.name, elem.code, elem.rank))
 
 
 if __name__ == '__main__':
     airports_hash = Airport.read_airports(AIRPORTS_FILE)
-    Edge.read_routes(ROUTES_FILE, airports_hash)
+    n = len(airports_hash)
+    airports_sink = Airport.read_routes(ROUTES_FILE, airports_hash)
     time1 = time.time()
-    page_ranks, iterations = compute_page_ranks()
+    iterations = compute_page_ranks()
     time2 = time.time()
-    output_page_ranks(page_ranks)
-    print('#Iterations: ', iterations)
-    print('Time of computePageRanks(): ', time2 - time1)
+    output_page_ranks_file('results.txt')
+    print("#Iterations:", iterations)
+    print("Time of compute_page_ranks():", time2-time1)
