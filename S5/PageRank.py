@@ -4,11 +4,12 @@ from Airport import Airport
 
 AIRPORTS_FILE = 'airports_filtered.txt'
 ROUTES_FILE = 'routes_filtered.txt'
+RESULTS_FILE = 'results.txt'
 
 EPSILON = 1e-8
 PRECISION = 5e-2
 MAX_ITERATIONS = 1000
-LAMBDA = 0.8
+LAMBDA = 0.9
 
 
 def init_ranks():
@@ -90,6 +91,6 @@ if __name__ == '__main__':
     time1 = time.time()
     iterations = compute_page_ranks()
     time2 = time.time()
-    output_page_ranks_file('results.txt')
+    output_page_ranks_file(RESULTS_FILE)
     print("#Iterations:", iterations)
     print("Time of compute_page_ranks():", time2-time1)
