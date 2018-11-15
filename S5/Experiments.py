@@ -65,6 +65,7 @@ def compute_output_results(path, results):
             for l in lambs[1:]:
                 ydata = results[init][l]['ranks']
                 f.write('MSE {} of {} with {}: {}\n'.format(init, res_compare, l, fmse(xdata, ydata)))
+            f.write('\n')
         f.write('DIFF INITS:\n')
         linits = ['1Dn', 'oneOne', 'sqrtN', 'random']
         for l in lambs:
@@ -73,6 +74,7 @@ def compute_output_results(path, results):
             for init in linits[1:]:
                 ydata = results[init][l]['ranks']
                 f.write('MSE {} of {} with {}: {}\n'.format(l, res_compare, init, fmse(xdata, ydata)))
+            f.write('\n')
 
 
 if __name__ == '__main__':
