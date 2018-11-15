@@ -38,13 +38,13 @@ def experiment_lambda_rounds(airports_hash, airports_sink, results, init_functio
         #     'results/results_' + init_type + lambda_str + '.txt', airports_hash)
 
 
-def fmse(xdata, ydata):
+def fmae(xdata, ydata):
     n = len(xdata)
     x = []
     y = []
     sum_diffs = 0.0
     for key, value in xdata.items():
-        sum_diffs += (value - ydata[key])**2
+        sum_diffs += abs(value - ydata[key])
     return sum_diffs/n
 
 
@@ -64,7 +64,7 @@ def compute_output_results(path, results):
             xdata = results[init][res_compare]['ranks']
             for l in lambs[1:]:
                 ydata = results[init][l]['ranks']
-                f.write('MSE {} of {} with {}: {}\n'.format(init, res_compare, l, fmse(xdata, ydata)))
+                f.write('MSE {} of {} with {}: {}\n'.format(init, res_compare, l, fmae(xdata, ydata)))
             f.write('\n')
         f.write('DIFF INITS:\n')
         linits = ['1Dn', 'oneOne', 'sqrtN', 'random']
@@ -73,7 +73,7 @@ def compute_output_results(path, results):
             xdata = results[res_compare][l]['ranks']
             for init in linits[1:]:
                 ydata = results[init][l]['ranks']
-                f.write('MSE {} of {} with {}: {}\n'.format(l, res_compare, init, fmse(xdata, ydata)))
+                f.write('MSE {} of {} with {}: {}\n'.format(l, res_compare, init, fmae(xdata, ydata)))
             f.write('\n')
 
 
