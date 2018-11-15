@@ -41,7 +41,7 @@ def init_ranks_sqrt_n(airports_hash):
     sqrt_n = int(sqrt(n))
     count = 1
     for k in airports_hash:
-        airports_hash[k].rank = 1.0/sqrt_n
+        airports_hash[k].rank = 1.0/int(sqrt_n)
         if count == sqrt_n:
             break
         count += 1

@@ -1,0 +1,28 @@
+TIMES ITERATIONS:
+1Dn and 0.5 -> time: 0.2390003204345703, iters: 15
+1Dn and 0.6 -> time: 0.3150186538696289, iters: 20
+1Dn and 0.7 -> time: 0.4480128288269043, iters: 29
+1Dn and 0.8 -> time: 0.7040276527404785, iters: 46
+1Dn and 0.9 -> time: 1.4860498905181885, iters: 97
+
+oneOne and 0.5 -> time: 0.38602519035339355, iters: 22
+oneOne and 0.6 -> time: 0.4980278015136719, iters: 28
+oneOne and 0.7 -> time: 0.6340174674987793, iters: 37
+oneOne and 0.8 -> time: 0.777024507522583, iters: 52
+oneOne and 0.9 -> time: 1.367037296295166, iters: 90
+
+LAMBDA VALUES:
+MSE 1Dn of 0.9 with 0.8: 8.73716126004164e-09
+MSE 1Dn of 0.9 with 0.7: 2.627336482185428e-08
+MSE 1Dn of 0.9 with 0.6: 4.748447349130556e-08
+MSE 1Dn of 0.9 with 0.5: 7.04810570723598e-08
+MSE oneOne of 0.9 with 0.8: 8.73738062965685e-09
+MSE oneOne of 0.9 with 0.7: 2.6273766656837058e-08
+MSE oneOne of 0.9 with 0.6: 4.7484990267473306e-08
+MSE oneOne of 0.9 with 0.5: 7.048167663866035e-08
+DIFF INITS:
+MSE 0.9 of 1Dn with oneOne: 8.233133851721521e-18
+MSE 0.8 of 1Dn with oneOne: 2.09919544014392e-18
+MSE 0.7 of 1Dn with oneOne: 5.493328348761403e-19
+MSE 0.6 of 1Dn with oneOne: 2.8673193719462704e-19
+MSE 0.5 of 1Dn with oneOne: 1.831311854412528e-19
