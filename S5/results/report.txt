@@ -1,0 +1,59 @@
+TIMES ITERATIONS:
+1Dn and 0.5 -> time: 0.21401000022888184, iters: 15
+1Dn and 0.6 -> time: 0.27200746536254883, iters: 20
+1Dn and 0.7 -> time: 0.39301252365112305, iters: 29
+1Dn and 0.8 -> time: 0.6410205364227295, iters: 46
+1Dn and 0.9 -> time: 1.2990262508392334, iters: 97
+
+oneOne and 0.5 -> time: 0.28700923919677734, iters: 22
+oneOne and 0.6 -> time: 0.3700120449066162, iters: 28
+oneOne and 0.7 -> time: 0.485015869140625, iters: 37
+oneOne and 0.8 -> time: 0.6790218353271484, iters: 52
+oneOne and 0.9 -> time: 1.1740381717681885, iters: 90
+
+sqrtN and 0.5 -> time: 0.2640087604522705, iters: 20
+sqrtN and 0.6 -> time: 0.3360109329223633, iters: 25
+sqrtN and 0.7 -> time: 0.4420144557952881, iters: 34
+sqrtN and 0.8 -> time: 0.6370203495025635, iters: 48
+sqrtN and 0.9 -> time: 1.1420366764068604, iters: 87
+
+random and 0.5 -> time: 0.5400176048278809, iters: 17
+random and 0.6 -> time: 0.6740217208862305, iters: 21
+random and 0.7 -> time: 0.893028974533081, iters: 28
+random and 0.8 -> time: 1.5590507984161377, iters: 49
+random and 0.9 -> time: 3.070098876953125, iters: 97
+
+LAMBDA VALUES:
+MSE 1Dn of 0.9 with 0.8: 8.73716126004164e-09
+MSE 1Dn of 0.9 with 0.7: 2.627336482185428e-08
+MSE 1Dn of 0.9 with 0.6: 4.748447349130556e-08
+MSE 1Dn of 0.9 with 0.5: 7.04810570723598e-08
+MSE oneOne of 0.9 with 0.8: 8.73738062965685e-09
+MSE oneOne of 0.9 with 0.7: 2.6273766656837058e-08
+MSE oneOne of 0.9 with 0.6: 4.7484990267473306e-08
+MSE oneOne of 0.9 with 0.5: 7.048167663866035e-08
+MSE sqrtN of 0.9 with 0.8: 8.737343634687567e-09
+MSE sqrtN of 0.9 with 0.7: 2.627367356788601e-08
+MSE sqrtN of 0.9 with 0.6: 4.748487509990407e-08
+MSE sqrtN of 0.9 with 0.5: 7.048150565199317e-08
+MSE random of 0.9 with 0.8: 8.737165128599469e-09
+MSE random of 0.9 with 0.7: 2.6273386462628105e-08
+MSE random of 0.9 with 0.6: 4.7484473203410216e-08
+MSE random of 0.9 with 0.5: 7.04810047555576e-08
+
+DIFF INITS:
+MSE 0.9 of 1Dn with oneOne: 8.233133851721521e-18
+MSE 0.9 of 1Dn with sqrtN: 5.1589494057049654e-18
+MSE 0.9 of 1Dn with random: 2.147359838742824e-20
+MSE 0.8 of 1Dn with oneOne: 2.09919544014392e-18
+MSE 0.8 of 1Dn with sqrtN: 2.425848946399564e-18
+MSE 0.8 of 1Dn with random: 2.702062863463413e-20
+MSE 0.7 of 1Dn with oneOne: 5.493328348761403e-19
+MSE 0.7 of 1Dn with sqrtN: 6.896200630988935e-19
+MSE 0.7 of 1Dn with random: 1.447800573199156e-19
+MSE 0.6 of 1Dn with oneOne: 2.8673193719462704e-19
+MSE 0.6 of 1Dn with sqrtN: 6.926373357292964e-19
+MSE 0.6 of 1Dn with random: 6.312129833465257e-20
+MSE 0.5 of 1Dn with oneOne: 1.831311854412528e-19
+MSE 0.5 of 1Dn with sqrtN: 2.5343600984384802e-19
+MSE 0.5 of 1Dn with random: 1.0570910158360844e-19
