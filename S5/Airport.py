@@ -14,7 +14,7 @@ class Airport:
         return "{0}\t{1}".format(self.code, self.name)
         # return "{0}\t{2}\t{1}".format(self.code, self.name, self.pageIndex)
 
-    def update_ranks(self):
+    def update_rank(self):
         self.rank = self.new_rank
 
     @staticmethod
