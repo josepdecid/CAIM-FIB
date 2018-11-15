@@ -6,7 +6,6 @@ from Airport import Airport
 
 AIRPORTS_FILE = 'airports_filtered.txt'
 ROUTES_FILE = 'routes_filtered.txt'
-RESULTS_FILE = 'results.txt'
 
 
 def extract_results_airports(airports_hash):
@@ -35,8 +34,8 @@ def experiment_lambda_rounds(airports_hash, airports_sink, results, init_functio
         # print(init_type, lambda_str)
         # print("#Iterations:", iterations)
         # print("Time of compute_page_ranks():", time2-time1)
-        pr.output_page_ranks_file(
-            'results/results_' + init_type + lambda_str + '.txt', airports_hash)
+        # pr.output_page_ranks_file(
+        #     'results/results_' + init_type + lambda_str + '.txt', airports_hash)
 
 
 def fmse(xdata, ydata):
