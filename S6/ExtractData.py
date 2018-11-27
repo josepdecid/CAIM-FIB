@@ -1,30 +1,8 @@
-"""
-.. module:: ExtractData
-
-ExtractData
-*************
-
-:Description: ExtractData
-
-    Generates vector data representation with the most frequent words
-
-:Authors: bejar
-    
-
-:Version: 
-
-:Created on: 12/07/2017 8:20 
-
-"""
-
-from __future__ import print_function, division
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import scan
-from elasticsearch.exceptions import NotFoundError
-
 import argparse
 
-__author__ = 'bejar'
+from elasticsearch import Elasticsearch
+from elasticsearch.exceptions import NotFoundError
+from elasticsearch.helpers import scan
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

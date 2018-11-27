@@ -1,31 +1,12 @@
-"""
-.. module:: MRKmeansDef
-
-MRKmeansDef
-*************
-
-:Description: MRKmeansDef
-
-    
-
-:Authors: bejar
-    
-
-:Version: 
-
-:Created on: 17/07/2017 7:42 
-
-"""
-
-from __future__ import division
 from mrjob.job import MRJob
 from mrjob.step import MRStep
-
-__author__ = 'bejar'
 
 
 class MRKmeansStep(MRJob):
     prototypes = {}
+
+    def cosine_sim(self, prot, doc):
+        pass
 
     def jaccard(self, prot, doc):
         """

@@ -1,31 +1,9 @@
-"""
-.. module:: MRKmeans
-
-MRKmeans
-*************
-
-:Description: MRKmeans
-
-    Iterates the MRKmeansStep script
-
-:Authors: bejar
-    
-
-:Version: 
-
-:Created on: 17/07/2017 10:16 
-
-"""
-from __future__ import print_function, division
-
 from MRKmeansStep import MRKmeansStep
 import shutil
 import argparse
 import os
 import time
 from mrjob.util import to_lines
-
-__author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -1,13 +1,10 @@
-"""
-WordCountMR
-"""
 from mrjob.job import MRJob
 import re
 
 WORD_RE = re.compile(r"[a-z]+")
 
-class MRWordFrequencyCount(MRJob):
 
+class MRWordFrequencyCount(MRJob):
     def mapper(self, _, line):
         for word in WORD_RE.findall(line):
             yield word.lower(), 1
