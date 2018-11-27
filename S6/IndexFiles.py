@@ -1,29 +1,3 @@
-"""
-.. module:: IndexFiles2
-
-IndexFiles
-******
-
-:Description: IndexFiles2
-
-    Indexes a set of files under the directory passed as a parameter (--path)
-    in the index name passed as a parameter (--index)
-
-    If the index exists it is dropped and created new
-
-    Documentation for the analyzer configuration:
-
-    https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html
-
-:Authors:
-    bejar
-
-:Version: 
-
-:Date:  23/06/2017
-"""
-
-from __future__ import print_function
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 from elasticsearch.exceptions import NotFoundError
@@ -39,7 +13,7 @@ def generate_files_list(path):
     :param path:
     :return:
     """
-    if path[-1] =='/':
+    if path[-1] == '/':
         path = path[:-1]
 
     lfiles = []
@@ -55,8 +29,10 @@ __author__ = 'bejar'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path', required=True, default=None, help='Path to the files')
-    parser.add_argument('--index', required=True, default=None, help='Index for the files')
+    parser.add_argument('--path', required=True,
+                        default=None, help='Path to the files')
+    parser.add_argument('--index', required=True,
+                        default=None, help='Index for the files')
     args = parser.parse_args()
 
     path = args.path
@@ -74,7 +50,8 @@ if __name__ == '__main__':
         for line in ftxt:
             text += line
         # Insert operation for a document with fields' path' and 'text'
-        ldocs.append({'_op_type': 'index', '_index': index, '_type': 'document', 'path': f, 'text': text})
+        ldocs.append({'_op_type': 'index', '_index': index,
+                      '_type': 'document', 'path': f, 'text': text})
 
     client = Elasticsearch()
 
