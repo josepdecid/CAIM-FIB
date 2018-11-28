@@ -1,59 +1,85 @@
-from MRKmeansStep import MRKmeansStep
-import shutil
 import argparse
 import os
-import time
+import shutil
+from time import time
+
 from mrjob.util import to_lines
 
-if __name__ == '__main__':
+from MRKmeansStep import MRKmeansStep
+
+
+def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--prot', default='prototypes.txt', help='Initial prototpes file')
+    parser.add_argument('--prot', default='prototypes.txt', help='Initial prototypes file')
     parser.add_argument('--docs', default='documents.txt', help='Documents data')
     parser.add_argument('--iter', default=5, type=int, help='Number of iterations')
     parser.add_argument('--nmaps', default=2, type=int, help='Number of parallel map processes to use')
     parser.add_argument('--nreduces', default=2, type=int, help='Number of parallel reduce processes to use')
+    return parser.parse_args()
 
-    args = parser.parse_args()
-    assign = {}
 
-    # Copies the initial prototypes
+def copy_prototypes(prototypes):
     cwd = os.getcwd()
-    shutil.copy(cwd + '/' + args.prot, cwd + '/prototypes0.txt')
+    shutil.copy(f'{cwd}/{prototypes}', f'{cwd}/prototypes0.txt')
 
-    nomove = False  # Stores if there has been changes in the current iteration
-    for i in range(args.iter):
-        tinit = time.time()  # For timing the iterations
 
-        # Configures the script
-        print('Iteration %d ...' % (i + 1))
+def run_runner(mr_job):
+    with mr_job.make_runner() as runner:
+        runner.run()
+        new_assign = {}
+        new_proto = {}
+        # Process the results of the script, each line one results
+        for line in to_lines(runner.cat_output()):
+            key, value = mr_job.parse_output_line(line)
+            # You should store things here probably in a data structure
+
+        # If your scripts returns the new assignments you could write them in a file here
+
+        # You should store the new prototypes here for the next iteration
+
+        # If you have saved the assignments, you can check if they have changed from the previous iteration
+
+
+def perform_iterations(iterations, docs, nmaps, nreduces):
+    cwd = os.getcwd()
+    no_move = False  # Stores if there has been changes in the current iteration
+    start_time = time()
+
+    i = 0
+    for i in range(iterations):
+        print(f'Iteration #{i+1}')
+
         # The --file flag tells to MRjob to copy the file to HADOOP
         # The --prot flag tells to MRKmeansStep where to load the prototypes from
-        mr_job1 = MRKmeansStep(args=['-r', 'local', args.docs,
-                                     '--file', cwd + '/prototypes%d.txt' % i,
-                                     '--prot', cwd + '/prototypes%d.txt' % i,
-                                     '--jobconf', 'mapreduce.job.maps=%d' % args.nmaps,
-                                     '--jobconf', 'mapreduce.job.reduces=%d' % args.nreduces])
+        mr_job = MRKmeansStep(args=['-r', 'local', docs,
+                                    '--file', f'{cwd}/prototypes{i}.txt',
+                                    '--prot', f'{cwd}/prototypes{i}.txt',
+                                    '--jobconf', f'mapreduce.job.maps={nmaps}',
+                                    '--jobconf', f'mapreduce.job.reduces={nreduces}'])
+        run_runner(mr_job)
+        print(f'Time = {time() - start_time} seconds')
 
-        # Runs the script
-        with mr_job1.make_runner() as runner1:
-            runner1.run()
-            new_assign = {}
-            new_proto = {}
-            # Process the results of the script, each line one results
-            for line in to_lines(runner1.cat_output()):
-                key, value = mr_job1.parse_output_line(line)
-                # You should store things here probably in a datastructure
-
-            # If your scripts returns the new assignments you could write them in a file here
-
-            # You should store the new prototypes here for the next iteration
-
-            # If you have saved the assignments, you can check if they have changed from the previous iteration
-
-        print("Time= %f seconds" % (time.time() - tinit))
-
-        if nomove:  # If there is no changes in two consecutive iteration we can stop
-            print("Algorithm converged")
+        # If there are no changes in two consecutive iteration we can stop
+        if no_move:
+            print('Algorithm converged')
             break
 
-    # Now the last prototype file should have the results
+    return i
+
+
+def print_results(iteration):
+    cwd = os.getcwd()
+    with open(f'{cwd}/prototypes{iteration}.txt', mode='r') as f:
+        for l in f.readlines():
+            print(l)
+
+
+def main():
+    args = parse_args()
+    copy_prototypes(args.prot)
+    num_its = perform_iterations(args.iter, args.docs, args.nmaps, args.nreduces)
+    print_results(num_its)
+
+
+if __name__ == '__main__':
+    main()

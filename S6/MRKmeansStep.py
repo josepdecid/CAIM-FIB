@@ -1,3 +1,5 @@
+from typing import List
+
 from mrjob.job import MRJob
 from mrjob.step import MRStep
 
@@ -5,34 +7,34 @@ from mrjob.step import MRStep
 class MRKmeansStep(MRJob):
     prototypes = {}
 
-    def cosine_sim(self, prot, doc):
+    def cosine_sim(self, prot: List[(str, float)], doc: List[str]):
+        """
+        Compute here the Cosine similarity between a prototype and a document
+        :param prot: List of pairs (word, probability)
+        :param doc: List of words (sorted alphabeticaly)
+        :return: Similarity value in the range [0, 1]
+        """
         pass
 
-    def jaccard(self, prot, doc):
+    def jaccard(self, prot: List[(str, float)], doc: List[str]):
         """
-        Compute here the Jaccard similarity between  a prototype and a document
-        prot should be a list of pairs (word, probability)
-        doc should be a list of words
-        Words must be alphabeticaly ordered
-
-        The result should be always a value in the range [0,1]
+        Compute here the Jaccard similarity between a prototype and a document
+        :param prot: List of pairs (word, probability)
+        :param doc: List of words (sorted alphabeticaly)
+        :return: Similarity value in the range [0, 1]
         """
-        return 1
+        pass
 
     def configure_args(self):
         """
         Additional configuration flag to get the prototypes files
-
-        :return:
         """
         super(MRKmeansStep, self).configure_args()
         self.add_file_arg('--prot')
 
     def load_data(self):
         """
-        Loads the current cluster prototypes
-
-        :return:
+        Loads the current cluster prototypes:
         """
         f = open(self.options.prot, 'r')
         for line in f:
@@ -87,7 +89,7 @@ class MRKmeansStep(MRJob):
     def steps(self):
         return [MRStep(mapper_init=self.load_data, mapper=self.assign_prototype,
                        reducer=self.aggregate_prototype)
-            ]
+                ]
 
 
 if __name__ == '__main__':
