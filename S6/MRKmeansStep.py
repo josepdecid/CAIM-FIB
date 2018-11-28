@@ -33,16 +33,6 @@ class MRKmeansStep(MRJob):
         union = len(prot) + len(doc)
         return intersection / (union - intersection)
 
-    @staticmethod
-    def cosine_sim(prot: List[Tuple[str, int]], doc: List[str]):
-        """
-        Compute here the Cosine similarity between a prototype and a document
-        :param prot: List of pairs (word, probability ∈ {0, 1})
-        :param doc: List of words (sorted alphabeticaly)
-        :return: Similarity value in the range [0, 1]
-        """
-        return 1
-
     def configure_args(self, distance_function=jaccard):
         """
         Additional configuration flag to get the prototypes files
@@ -102,9 +92,7 @@ class MRKmeansStep(MRJob):
         yield (0, 1)
 
     def steps(self):
-        return [
-            MRStep(mapper_init=self.load_data, mapper=self.map_closest_prototype, reducer=self.reduce_closest_prototype)
-        ]
+        return [MRStep(mapper_init=self.load_data, mapper=self.map_closest_prototype, reducer=self.reduce_closest_prototype)]
 
 
 if __name__ == '__main__':
