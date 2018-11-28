@@ -1,11 +1,15 @@
 import argparse
 import os
 import shutil
+from functools import reduce
 from time import time
 
 from mrjob.util import to_lines
 
 from MRKmeansStep import MRKmeansStep
+
+no_move = False
+assignation = {}
 
 
 def parse_args():
@@ -23,27 +27,40 @@ def copy_prototypes(prototypes):
     shutil.copy(f'{cwd}/{prototypes}', f'{cwd}/prototypes0.txt')
 
 
-def run_runner(mr_job):
+def run_runner(mr_job, i):
+    global assignation
+    global no_move
     with mr_job.make_runner() as runner:
         runner.run()
-        new_assign = {}
-        new_proto = {}
-        # Process the results of the script, each line one results
+        new_assignation = {}
+        new_prototype = {}
         for line in to_lines(runner.cat_output()):
             key, value = mr_job.parse_output(line)
-            # You should store things here probably in a data structure
 
-        # If your scripts returns the new assignments you could write them in a file here
+            new_assignation[key] = value[0]
+            new_prototype[key] = value[1]
 
-        # You should store the new prototypes here for the next iteration
+        cwd = os.getcwd()
+        with open(f'{cwd}/assignments{i + 1}.txt', mode='w') as new_assignation_file:
+            for key, values in new_assignation.items():
+                aux = reduce(lambda acc, x: f'{acc} {x}', values, f'{key}:')
+                new_assignation_file.write(f'{aux}\n')
 
-        # If you have saved the assignments, you can check if they have changed from the previous iteration
+        if assignation == new_assignation:
+            no_move = True
+            return i
+        else:
+            assignation = new_assignation
+
+        with open(f'{cwd}/prototypes{i + 1}.txt', mode='w') as new_prototype_file:
+            for key, values in new_prototype.items():
+                aux = reduce(lambda acc, x: f' {aux} {x[0]}+{repr(x[1])}', values, f'{key}:')
+                new_prototype_file.write(f'{aux}\n')
 
 
 def perform_iterations(iterations, docs, nmaps, nreduces):
-    cwd = os.getcwd()
-    no_move = False  # Stores if there has been changes in the current iteration
     start_time = time()
+    cwd = os.getcwd()
 
     i = 0
     for i in range(iterations):
@@ -56,14 +73,13 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
                                     '--prot', f'{cwd}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}'])
-        mr_job.configure_args(distance_function=MRKmeansStep.jaccard)
-        run_runner(mr_job)
+        j = run_runner(mr_job, i)
         print(f'Time = {time() - start_time} seconds')
 
         # If there are no changes in two consecutive iteration we can stop
         if no_move:
             print('Algorithm converged')
-            break
+            return j
 
     return i
 
