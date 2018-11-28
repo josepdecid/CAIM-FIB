@@ -30,7 +30,7 @@ def run_runner(mr_job):
         new_proto = {}
         # Process the results of the script, each line one results
         for line in to_lines(runner.cat_output()):
-            key, value = mr_job.parse_output_line(line)
+            key, value = mr_job.parse_output(line)
             # You should store things here probably in a data structure
 
         # If your scripts returns the new assignments you could write them in a file here
@@ -56,6 +56,7 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
                                     '--prot', f'{cwd}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}'])
+        mr_job.configure_args(distance_function=MRKmeansStep.jaccard)
         run_runner(mr_job)
         print(f'Time = {time() - start_time} seconds')
 
@@ -74,12 +75,11 @@ def print_results(iteration):
             print(l)
 
 
-def main():
-    args = parse_args()
+def main(args):
     copy_prototypes(args.prot)
     num_its = perform_iterations(args.iter, args.docs, args.nmaps, args.nreduces)
     print_results(num_its)
 
 
 if __name__ == '__main__':
-    main()
+    main(parse_args())
