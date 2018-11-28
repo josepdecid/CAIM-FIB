@@ -76,7 +76,8 @@ class MRKmeansStep(MRJob):
         # Return pair key, value
         yield closest_prototype_id, (doc_id, d_words)
 
-    def reduce_closest_prototype(self, key, values):
+    @staticmethod
+    def reduce_closest_prototype(key, values):
         """
         input is cluster and all the documents it has assigned
         Outputs should be at least a pair (cluster, new prototype)
@@ -89,10 +90,25 @@ class MRKmeansStep(MRJob):
         Words are ordered alphabetically but you will have to use an efficient structure to
         compute the frequency of each word
         """
-        yield (0, 1)
+        new_prototype = {}
+        new_prototype_docs = []
+        for document in values:
+            new_prototype_docs.append(document[0])
+            for word in document[1]:
+                new_prototype[word] = 0 if word in new_prototype else new_prototype[word] + 1
+
+        new_prototype = [(word, new_prototype[word] / len(values)) for word in new_prototype]
+        sorted(new_prototype_docs)
+        sorted(new_prototype, key=lambda e: e[0])
+
+        yield key, new_prototype_docs, new_prototype
 
     def steps(self):
-        return [MRStep(mapper_init=self.load_data, mapper=self.map_closest_prototype, reducer=self.reduce_closest_prototype)]
+        return [
+            MRStep(mapper_init=self.load_data,
+                   mapper=self.map_closest_prototype,
+                   reducer=self.reduce_closest_prototype)
+        ]
 
 
 if __name__ == '__main__':
