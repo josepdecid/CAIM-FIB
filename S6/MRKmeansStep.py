@@ -7,7 +7,6 @@ from mrjob.step import MRStep
 
 class MRKmeansStep(MRJob):
     prototypes = {}
-    distance_function = None
 
     @staticmethod
     def jaccard(prot: List[Tuple[str, float]], doc: List[str]):
@@ -33,19 +32,18 @@ class MRKmeansStep(MRJob):
         union = len(prot) + len(doc)
         return intersection / (union - intersection)
 
-    def configure_args(self, distance_function=jaccard):
+    def configure_args(self):
         """
         Additional configuration flag to get the prototypes files
         """
         super(MRKmeansStep, self).configure_args()
         self.add_file_arg('--prot')
-        self.distance_function = distance_function
 
     # Implementation #
 
     def load_data(self):
         """
-        Loads the current cluster prototypes:
+        Loads the current cluster prototypes into a dictionary
         """
         f = open(self.options.prot, 'r')
         for line in f:
@@ -55,20 +53,22 @@ class MRKmeansStep(MRJob):
                 cp.append((word.split('+')[0], float(word.split('+')[1])))
             self.prototypes[cluster] = cp
 
-    def map_closest_prototype(self, _, line):
+    def map_closest_prototype(self, _, line: str):
         """
-        This is the mapper it should compute the closest prototype to a document
-        Words should be sorted alphabetically in the prototypes and the documents
-        This function has to return at list of pairs (prototype_id, document words)
-        You can add also more elements to the value element, for example the document_id
+        MAPPER
+        It computes the closest prototype to a document.
+        Words should be sorted alphabetically in the prototypes and the documents.
+        :param _
+        :param line: String "docId: [word_1 .. word_n]
+        :return List of pairs (prototype_id, (document_id, document_words))
         """
-        doc_id, words = line.split(': ')  # docId: [word1..n]
+        doc_id, words = line.split(': ')
         d_words = words.split()
 
         closest_prototype_id = None
         closest_distance = sys.float_info.max
         for cluster, c_words in self.prototypes.items():
-            distance = self.distance_function(c_words, d_words)
+            distance = MRKmeansStep.jaccard(c_words, d_words)
             if distance < closest_distance:
                 closest_distance = distance
                 closest_prototype_id = cluster
@@ -95,13 +95,13 @@ class MRKmeansStep(MRJob):
         for document in values:
             new_prototype_docs.append(document[0])
             for word in document[1]:
-                new_prototype[word] = 0 if word in new_prototype else new_prototype[word] + 1
+                new_prototype[word] = 1 if word not in new_prototype else new_prototype[word] + 1
 
         new_prototype = [(word, new_prototype[word] / len(values)) for word in new_prototype]
         sorted(new_prototype_docs)
         sorted(new_prototype, key=lambda e: e[0])
 
-        yield key, new_prototype_docs, new_prototype
+        yield key, (new_prototype_docs, new_prototype)
 
     def steps(self):
         return [

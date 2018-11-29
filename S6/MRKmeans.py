@@ -8,7 +8,6 @@ from mrjob.util import to_lines
 
 from MRKmeansStep import MRKmeansStep
 
-no_move = False
 assignation = {}
 
 
@@ -22,14 +21,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def copy_prototypes(prototypes):
+def copy_prototypes(prototypes_file):
     cwd = os.getcwd()
-    shutil.copy(f'{cwd}/{prototypes}', f'{cwd}/prototypes0.txt')
+    shutil.copy(f'{cwd}/{prototypes_file}', f'{cwd}/prototypes0.txt')
 
 
 def run_runner(mr_job, i):
-    global assignation
-    global no_move
     with mr_job.make_runner() as runner:
         runner.run()
         new_assignation = {}
@@ -46,8 +43,8 @@ def run_runner(mr_job, i):
                 aux = reduce(lambda acc, x: f'{acc} {x}', values, f'{key}:')
                 new_assignation_file.write(f'{aux}\n')
 
+        global assignation
         if assignation == new_assignation:
-            no_move = True
             return i
         else:
             assignation = new_assignation
@@ -73,13 +70,13 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
                                     '--prot', f'{cwd}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}'])
-        j = run_runner(mr_job, i)
+        stopping_iteration = run_runner(mr_job, i)
         print(f'Time = {time() - start_time} seconds')
 
         # If there are no changes in two consecutive iteration we can stop
-        if no_move:
+        if stopping_iteration is not None:
             print('Algorithm converged')
-            return j
+            return stopping_iteration
 
     return i
 
