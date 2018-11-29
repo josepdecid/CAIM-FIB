@@ -13,11 +13,16 @@ assignation = {}
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--prot', default='prototypes.txt', help='Initial prototypes file')
-    parser.add_argument('--docs', default='documents.txt', help='Documents data')
-    parser.add_argument('--iter', default=5, type=int, help='Number of iterations')
-    parser.add_argument('--nmaps', default=2, type=int, help='Number of parallel map processes to use')
-    parser.add_argument('--nreduces', default=2, type=int, help='Number of parallel reduce processes to use')
+    parser.add_argument('--prot', default='prototypes.txt',
+                        help='Initial prototypes file')
+    parser.add_argument('--docs', default='documents.txt',
+                        help='Documents data')
+    parser.add_argument('--iter', default=5, type=int,
+                        help='Number of iterations')
+    parser.add_argument('--nmaps', default=2, type=int,
+                        help='Number of parallel map processes to use')
+    parser.add_argument('--nreduces', default=2, type=int,
+                        help='Number of parallel reduce processes to use')
     return parser.parse_args()
 
 
@@ -51,17 +56,9 @@ def run_runner(mr_job, i):
 
         with open(f'{cwd}/prototypes{i + 1}.txt', mode='w') as new_prototype_file:
             for key, values in new_prototype.items():
-                aux = reduce(lambda acc, x: f'{acc} {x[0]}+{x[1]}', values, f'{key}:')
-                new_prototype_file.write(f'{aux}\r\n')
-
-        # newProtoFile = open(cwd + '/prototypes%d.txt' % (i + 1), 'w')
-        # for key in new_prototype:
-        #     auxString = key + ':'
-        #     for item in new_prototype[key]:
-        #         auxString = auxString + item[0] + '+' + repr(item[1]) + ' '
-        #     auxString = auxString[:-1]
-        #     newProtoFile.write(auxString + '\r\n')
-        # newProtoFile.close()
+                aux = reduce(
+                    lambda acc, x: f'{acc} {x[0]}+{x[1]}', values, f'{key}:')
+                new_prototype_file.write(f'{aux}\n')
 
 
 def perform_iterations(iterations, docs, nmaps, nreduces):
@@ -100,7 +97,8 @@ def print_results(iteration):
 
 def main(args):
     copy_prototypes(args.prot)
-    num_its = perform_iterations(args.iter, args.docs, args.nmaps, args.nreduces)
+    num_its = perform_iterations(
+        args.iter, args.docs, args.nmaps, args.nreduces)
     print_results(num_its)
 
 
