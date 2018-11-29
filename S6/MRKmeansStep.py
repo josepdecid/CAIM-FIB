@@ -9,7 +9,7 @@ class MRKmeansStep(MRJob):
     prototypes = {}
 
     @staticmethod
-    def jaccard(prot: List[Tuple[str, float]], doc: List[str]):
+    def jaccard(prot: List[Tuple[str, float]], doc: List[str]) -> float:
         """
         Compute here the Jaccard similarity between a prototype and a document
         :param prot: List of pairs (word, probability)
@@ -97,7 +97,7 @@ class MRKmeansStep(MRJob):
             for word in document[1]:
                 new_prototype[word] = 1 if word not in new_prototype else new_prototype[word] + 1
 
-        new_prototype = [(word, new_prototype[word] / len(values)) for word in new_prototype]
+        new_prototype = [(word, new_prototype[word] / len(new_prototype_docs)) for word in new_prototype]
         sorted(new_prototype_docs)
         sorted(new_prototype, key=lambda e: e[0])
 

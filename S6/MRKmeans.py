@@ -32,7 +32,7 @@ def run_runner(mr_job, i):
         new_assignation = {}
         new_prototype = {}
         for line in to_lines(runner.cat_output()):
-            key, value = mr_job.parse_output(line)
+            key, value = mr_job.parse_output_line(line)
 
             new_assignation[key] = value[0]
             new_prototype[key] = value[1]
