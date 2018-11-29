@@ -25,6 +25,7 @@ class MRKmeansStep(MRJob):
             elif prot[i][0] > doc[j]:
                 j += 1
             else:
+                # TODO: 1?
                 intersection += 1
                 i += 1
                 j += 1

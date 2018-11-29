@@ -51,17 +51,26 @@ def run_runner(mr_job, i):
 
         with open(f'{cwd}/prototypes{i + 1}.txt', mode='w') as new_prototype_file:
             for key, values in new_prototype.items():
-                aux = reduce(lambda acc, x: f' {aux} {x[0]}+{repr(x[1])}', values, f'{key}:')
-                new_prototype_file.write(f'{aux}\n')
+                aux = reduce(lambda acc, x: f'{acc} {x[0]}+{x[1]}', values, f'{key}:')
+                new_prototype_file.write(f'{aux}\r\n')
+
+        # newProtoFile = open(cwd + '/prototypes%d.txt' % (i + 1), 'w')
+        # for key in new_prototype:
+        #     auxString = key + ':'
+        #     for item in new_prototype[key]:
+        #         auxString = auxString + item[0] + '+' + repr(item[1]) + ' '
+        #     auxString = auxString[:-1]
+        #     newProtoFile.write(auxString + '\r\n')
+        # newProtoFile.close()
 
 
 def perform_iterations(iterations, docs, nmaps, nreduces):
-    start_time = time()
     cwd = os.getcwd()
 
     i = 0
     for i in range(iterations):
         print(f'Iteration #{i+1}')
+        start_time = time()
 
         # The --file flag tells to MRjob to copy the file to HADOOP
         # The --prot flag tells to MRKmeansStep where to load the prototypes from
