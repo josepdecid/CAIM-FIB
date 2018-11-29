@@ -78,7 +78,8 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
                                     '--file', f'{cwd}/prototypes{i}.txt',
                                     '--prot', f'{cwd}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
-                                    '--jobconf', f'mapreduce.job.reduces={nreduces}'])
+                                    '--jobconf', f'mapreduce.job.reduces={nreduces}',
+                                    '--num-cores', str(nmaps)])
         stopping_iteration = run_runner(mr_job, i)
         print(f'Time = {time() - start_time} seconds')
 
