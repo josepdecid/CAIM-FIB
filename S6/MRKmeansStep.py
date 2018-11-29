@@ -25,13 +25,12 @@ class MRKmeansStep(MRJob):
             elif prot[i][0] > doc[j]:
                 j += 1
             else:
-                # TODO: 1?
-                intersection += 1
+                intersection += prot[i][1]
                 i += 1
                 j += 1
 
-        union = len(prot) + len(doc)
-        return intersection / (union - intersection)
+        union = sum([p*p for (_, p) in prot]) + len(doc) - intersection
+        return intersection / union
 
     def configure_args(self):
         """
