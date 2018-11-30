@@ -10,6 +10,7 @@ if __name__ == '__main__':
     parser.add_argument('--minfreq', default=0.0, type=float, required=False, help='Minimum word frequency')
     parser.add_argument('--maxfreq', default=1.0, type=float, required=False, help='Maximum word frequency')
     parser.add_argument('--numwords', default=None, type=int, required=False, help='Number of words')
+    parser.add_argument('--folder', default='', required=False, help='Experiments folder')
 
     args = parser.parse_args()
 
@@ -17,6 +18,7 @@ if __name__ == '__main__':
     minfreq = args.minfreq
     maxfreq = args.maxfreq
     numwords = args.numwords
+    folder = args.folder
 
     try:
         client = Elasticsearch()
@@ -57,13 +59,13 @@ if __name__ == '__main__':
             docterms[doc] = docterms[doc].intersection(lwords)
 
         print('Saving data ...')
-        f = open('vocabulary.txt', 'w')
+        f = open(f'{folder}/vocabulary.txt', 'w')
         for p in sorted(lwords):
             f.write(p.encode('ascii', 'replace').decode() + ' ' + str(voc[p]) + '\n')
         f.flush()
         f.close()
 
-        f = open('documents.txt', 'w')
+        f = open(f'{folder}/documents.txt', 'w')
         for doc in docterms:
             docname = doc.split('/')
             docname = docname[-2] + '/' + docname[-1]
