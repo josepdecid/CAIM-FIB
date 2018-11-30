@@ -1,5 +1,6 @@
 import argparse
 
+import os
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch.helpers import scan
@@ -59,6 +60,8 @@ if __name__ == '__main__':
             docterms[doc] = docterms[doc].intersection(lwords)
 
         print('Saving data ...')
+        if not os.path.exists(folder):
+            os.mkdir(folder)
         f = open(f'{folder}/vocabulary.txt', 'w')
         for p in sorted(lwords):
             f.write(p.encode('ascii', 'replace').decode() + ' ' + str(voc[p]) + '\n')
