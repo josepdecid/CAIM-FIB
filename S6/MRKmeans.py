@@ -25,7 +25,10 @@ def parse_args():
                         help='Number of parallel reduce processes to use')
     parser.add_argument('--folder', default='',
                         help='Experiments folder')
-    return parser.parse_args()
+    parser.add_argument('--sim', default='jaccard',
+                        help='Similarity function to use')
+    args = parser.parse_args()
+    args.sim = MRKmeansStep.jaccard if args.sim == 'jaccard' else MRKmeansStep.cosine_similarity
 
 
 def copy_prototypes(prototypes_file, folder):
