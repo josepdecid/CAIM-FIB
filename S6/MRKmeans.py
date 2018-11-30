@@ -89,7 +89,7 @@ def perform_iterations(iterations, docs, nmaps, nreduces, folder):
         stopping_iteration, final_prototype = run_runner(mr_job, i, folder)
         print(f'Time = {time() - start_time} seconds')
 
-        write_prototype(final_prototype, f'{cwd}/prototypes-final.txt')
+        write_prototype(final_prototype, f'{cwd}/{folder}/prototypes-final.txt')
 
         # If there are no changes in two consecutive iteration we can stop
         if stopping_iteration is not None:
@@ -99,18 +99,18 @@ def perform_iterations(iterations, docs, nmaps, nreduces, folder):
     return i
 
 
-def print_results(iteration, folder):
+def print_results(folder):
     cwd = os.getcwd()
-    with open(f'{cwd}/{folder}/prototypes{iteration}.txt', mode='r') as f:
+    with open(f'{cwd}/{folder}/prototypes-final.txt', mode='r') as f:
         for l in f.readlines():
             print(l)
 
 
 def main(args):
     copy_prototypes(args.prot, args.folder)
-    num_its = perform_iterations(
+    perform_iterations(
         args.iter, args.docs, args.nmaps, args.nreduces, args.folder)
-    print_results(num_its, args.folder)
+    print_results(args.folder)
 
 
 if __name__ == '__main__':
