@@ -6,6 +6,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', default='documents.txt', help='Data with the examples')
     parser.add_argument('--nclust', default=2, type=int, help='Number of clusters')
+    parser.add_argument('--folder', default='', help='Experiments folder')
 
     args = parser.parse_args()
 
@@ -18,7 +19,7 @@ if __name__ == '__main__':
 
     # Generate nclust prototypes with nclust random documents
     doc = choice(range(len(ldocs)), args.nclust)
-    f = open('prototypes.txt', 'w')
+    f = open(f'{args.folder}/prototypes.txt', 'w')
     for i, d in enumerate(doc):
         docvec = ''
         for v in ldocs[d].split():
