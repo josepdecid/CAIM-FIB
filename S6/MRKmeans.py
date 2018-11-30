@@ -29,6 +29,7 @@ def parse_args():
                         help='Similarity function to use')
     args = parser.parse_args()
     args.sim = MRKmeansStep.jaccard if args.sim == 'jaccard' else MRKmeansStep.cosine_similarity
+    return args
 
 
 def copy_prototypes(prototypes_file, folder):
@@ -70,7 +71,7 @@ def run_runner(mr_job, i, folder):
         write_prototype(new_prototype, f'{cwd}/{folder}/prototypes{i + 1}.txt')
 
 
-def perform_iterations(iterations, docs, nmaps, nreduces, folder):
+def perform_iterations(iterations, docs, nmaps, nreduces, folder, similarity_function):
     cwd = os.getcwd()
 
     i = 0
@@ -85,7 +86,7 @@ def perform_iterations(iterations, docs, nmaps, nreduces, folder):
                                     '--prot', f'{cwd}/{folder}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}',
-                                    '--num-cores', str(nmaps)])
+                                    '--num-cores', str(nmaps)], similarity_function=similarity_function)
         stopping_iteration, final_prototype = run_runner(mr_job, i, folder)
         print(f'Time = {time() - start_time} seconds')
 
@@ -108,8 +109,7 @@ def print_results(folder):
 
 def main(args):
     copy_prototypes(args.prot, args.folder)
-    perform_iterations(
-        args.iter, args.docs, args.nmaps, args.nreduces, args.folder)
+    perform_iterations(args.iter, args.docs, args.nmaps, args.nreduces, args.folder, args.sim)
     print_results(args.folder)
 
 

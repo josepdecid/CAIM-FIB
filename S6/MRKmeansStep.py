@@ -7,7 +7,11 @@ from mrjob.step import MRStep
 
 
 class MRKmeansStep(MRJob):
-    prototypes = {}
+
+    def __init__(self, args, similarity_function):
+        super().__init__(args=args)
+        self.prototypes = {}
+        self.similarity_function = similarity_function
 
     @staticmethod
     def intersection(prot: List[Tuple[str, float]], doc: List[str]) -> float:
@@ -79,7 +83,7 @@ class MRKmeansStep(MRJob):
         closest_prototype_id = None
         closest_distance = sys.float_info.max
         for cluster, c_words in self.prototypes.items():
-            distance = MRKmeansStep.jaccard(c_words, d_words)
+            distance = self.similarity_function(c_words, d_words)
             if distance < closest_distance:
                 closest_distance = distance
                 closest_prototype_id = cluster
