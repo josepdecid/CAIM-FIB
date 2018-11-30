@@ -10,6 +10,22 @@ class MRKmeansStep(MRJob):
     prototypes = {}
 
     @staticmethod
+    def intersection(prot: List[Tuple[str, float]], doc: List[str]) -> float:
+        intersection = 0
+        i = 0
+        j = 0
+        while i < len(prot) and j < len(doc):
+            if prot[i][0] < doc[j]:
+                i += 1
+            elif prot[i][0] > doc[j]:
+                j += 1
+            else:
+                intersection += prot[i][1]
+                i += 1
+                j += 1
+        return intersection
+
+    @staticmethod
     def jaccard(prot: List[Tuple[str, float]], doc: List[str]) -> float:
         """
         Compute here the Jaccard similarity between a prototype and a document
@@ -17,37 +33,13 @@ class MRKmeansStep(MRJob):
         :param doc: List of words (sorted alphabeticaly)
         :return: Similarity value in the range [0, 1]
         """
-        intersection = 0
-        i = 0
-        j = 0
-        while i < len(prot) and j < len(doc):
-            if prot[i][0] < doc[j]:
-                i += 1
-            elif prot[i][0] > doc[j]:
-                j += 1
-            else:
-                intersection += prot[i][1]
-                i += 1
-                j += 1
-
+        intersection = MRKmeansStep.intersection(prot, doc)
         union = sum([p*p for (_, p) in prot]) + len(doc) - intersection
-        return intersection / union
+        return intersection/union
 
     @staticmethod
     def cosine_similarity(prot: List[Tuple[str, float]], doc: List[str]) -> float:
-        intersection = 0
-        i = 0
-        j = 0
-        while i < len(prot) and j < len(doc):
-            if prot[i][0] < doc[j]:
-                i += 1
-            elif prot[i][0] > doc[j]:
-                j += 1
-            else:
-                intersection += prot[i][1]
-                i += 1
-                j += 1
-
+        intersection = MRKmeansStep.intersection(prot, doc)
         divisor = sqrt(sum([p*p for (_, p) in prot]))*sqrt(len(doc))
         return intersection/divisor
 
