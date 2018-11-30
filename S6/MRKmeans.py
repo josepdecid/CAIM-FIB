@@ -31,6 +31,14 @@ def copy_prototypes(prototypes_file):
     shutil.copy(f'{cwd}/{prototypes_file}', f'{cwd}/prototypes0.txt')
 
 
+def write_prototype(prototype, file_name):
+    with open(file_name, mode='w') as prototype_file:
+        for key, values in prototype.items():
+            aux = reduce(
+                lambda acc, x: f'{acc} {x[0]}+{x[1]}', values, f'{key}:')
+            prototype_file.write(f'{aux}\n')
+
+
 def run_runner(mr_job, i):
     with mr_job.make_runner() as runner:
         runner.run()
@@ -50,15 +58,11 @@ def run_runner(mr_job, i):
 
         global assignation
         if assignation == new_assignation:
-            return i
+            return i, new_prototype
         else:
             assignation = new_assignation
 
-        with open(f'{cwd}/prototypes{i + 1}.txt', mode='w') as new_prototype_file:
-            for key, values in new_prototype.items():
-                aux = reduce(
-                    lambda acc, x: f'{acc} {x[0]}+{x[1]}', values, f'{key}:')
-                new_prototype_file.write(f'{aux}\n')
+        write_prototype(new_prototype, f'{cwd}/prototypes{i + 1}.txt')
 
 
 def perform_iterations(iterations, docs, nmaps, nreduces):
@@ -77,8 +81,10 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}',
                                     '--num-cores', str(nmaps)])
-        stopping_iteration = run_runner(mr_job, i)
+        stopping_iteration, final_prototype = run_runner(mr_job, i)
         print(f'Time = {time() - start_time} seconds')
+
+        write_prototype(final_prototype, f'{cwd}/prototypes-final.txt')
 
         # If there are no changes in two consecutive iteration we can stop
         if stopping_iteration is not None:
