@@ -23,18 +23,19 @@ def parse_args():
                         help='Number of parallel map processes to use')
     parser.add_argument('--nreduces', default=2, type=int,
                         help='Number of parallel reduce processes to use')
-    parser.add_argument('--folder', default='',
+    parser.add_argument('--folder', default='//',
                         help='Experiments folder')
-    parser.add_argument('--sim', default='jaccard',
-                        help='Similarity function to use')
     args = parser.parse_args()
-    args.sim = MRKmeansStep.jaccard if args.sim == 'jaccard' else MRKmeansStep.cosine_similarity
     return args
 
 
 def copy_prototypes(prototypes_file, folder):
     cwd = os.getcwd()
-    shutil.copy(f'{cwd}/{folder}/{prototypes_file}', f'{cwd}/{folder}/prototypes0.txt')
+    previous_folder = folder.split('/')
+    previous_folder = f'{previous_folder[0]}/{previous_folder[1]}'
+    if not os.path.exists(folder):
+        os.mkdir(folder)
+    shutil.copy(f'{cwd}/{previous_folder}/{prototypes_file}', f'{cwd}/{folder}/prototypes0.txt')
 
 
 def write_prototype(prototype, file_name):
@@ -67,11 +68,10 @@ def run_runner(mr_job, i, folder):
             return i, new_prototype
         else:
             assignation = new_assignation
+            write_prototype(new_prototype, f'{cwd}/{folder}/prototypes{i + 1}.txt')
 
-        write_prototype(new_prototype, f'{cwd}/{folder}/prototypes{i + 1}.txt')
 
-
-def perform_iterations(iterations, docs, nmaps, nreduces, folder, similarity_function):
+def perform_iterations(iterations, docs, nmaps, nreduces, folder):
     cwd = os.getcwd()
 
     i = 0
@@ -86,31 +86,22 @@ def perform_iterations(iterations, docs, nmaps, nreduces, folder, similarity_fun
                                     '--prot', f'{cwd}/{folder}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}',
-                                    '--num-cores', str(nmaps)], similarity_function=similarity_function)
-        stopping_iteration, final_prototype = run_runner(mr_job, i, folder)
+                                    '--num-cores', str(nmaps)])
+        result = run_runner(mr_job, i, folder)
         print(f'Time = {time() - start_time} seconds')
 
-        write_prototype(final_prototype, f'{cwd}/{folder}/prototypes-final.txt')
-
         # If there are no changes in two consecutive iteration we can stop
-        if stopping_iteration is not None:
+        if result is not None:
             print('Algorithm converged')
-            return stopping_iteration
+            write_prototype(result[1], f'{cwd}/{folder}/prototypes-final.txt')
+            return result[0]
 
     return i
 
 
-def print_results(folder):
-    cwd = os.getcwd()
-    with open(f'{cwd}/{folder}/prototypes-final.txt', mode='r') as f:
-        for l in f.readlines():
-            print(l)
-
-
 def main(args):
     copy_prototypes(args.prot, args.folder)
-    perform_iterations(args.iter, args.docs, args.nmaps, args.nreduces, args.folder, args.sim)
-    print_results(args.folder)
+    perform_iterations(args.iter, args.docs, args.nmaps, args.nreduces, args.folder)
 
 
 if __name__ == '__main__':

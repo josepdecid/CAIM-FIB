@@ -1,3 +1,4 @@
+import os
 from numpy.random import choice
 
 import argparse
@@ -9,6 +10,8 @@ if __name__ == '__main__':
     parser.add_argument('--folder', default='', help='Experiments folder')
 
     args = parser.parse_args()
+    previous_folder = args.folder.split('/')[0]
+    args.data = f'{previous_folder}/{args.data}'
 
     f = open(args.data, 'r')
 
@@ -19,6 +22,8 @@ if __name__ == '__main__':
 
     # Generate nclust prototypes with nclust random documents
     doc = choice(range(len(ldocs)), args.nclust)
+    if not os.path.exists(args.folder):
+        os.mkdir(args.folder)
     f = open(f'{args.folder}/prototypes.txt', 'w')
     for i, d in enumerate(doc):
         docvec = ''
