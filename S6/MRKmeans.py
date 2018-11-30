@@ -23,12 +23,14 @@ def parse_args():
                         help='Number of parallel map processes to use')
     parser.add_argument('--nreduces', default=2, type=int,
                         help='Number of parallel reduce processes to use')
+    parser.add_argument('--folder', default='',
+                        help='Experiments folder')
     return parser.parse_args()
 
 
-def copy_prototypes(prototypes_file):
+def copy_prototypes(prototypes_file, folder):
     cwd = os.getcwd()
-    shutil.copy(f'{cwd}/{prototypes_file}', f'{cwd}/prototypes0.txt')
+    shutil.copy(f'{cwd}/{folder}/{prototypes_file}', f'{cwd}/{folder}/prototypes0.txt')
 
 
 def write_prototype(prototype, file_name):
@@ -39,7 +41,7 @@ def write_prototype(prototype, file_name):
             prototype_file.write(f'{aux}\n')
 
 
-def run_runner(mr_job, i):
+def run_runner(mr_job, i, folder):
     with mr_job.make_runner() as runner:
         runner.run()
         new_assignation = {}
@@ -51,7 +53,7 @@ def run_runner(mr_job, i):
             new_prototype[key] = value[1]
 
         cwd = os.getcwd()
-        with open(f'{cwd}/assignments{i + 1}.txt', mode='w') as new_assignation_file:
+        with open(f'{cwd}/{folder}/assignments{i + 1}.txt', mode='w') as new_assignation_file:
             for key, values in new_assignation.items():
                 aux = reduce(lambda acc, x: f'{acc} {x}', values, f'{key}:')
                 new_assignation_file.write(f'{aux}\n')
@@ -62,10 +64,10 @@ def run_runner(mr_job, i):
         else:
             assignation = new_assignation
 
-        write_prototype(new_prototype, f'{cwd}/prototypes{i + 1}.txt')
+        write_prototype(new_prototype, f'{cwd}/{folder}/prototypes{i + 1}.txt')
 
 
-def perform_iterations(iterations, docs, nmaps, nreduces):
+def perform_iterations(iterations, docs, nmaps, nreduces, folder):
     cwd = os.getcwd()
 
     i = 0
@@ -76,12 +78,12 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
         # The --file flag tells to MRjob to copy the file to HADOOP
         # The --prot flag tells to MRKmeansStep where to load the prototypes from
         mr_job = MRKmeansStep(args=['-r', 'local', docs,
-                                    '--file', f'{cwd}/prototypes{i}.txt',
-                                    '--prot', f'{cwd}/prototypes{i}.txt',
+                                    '--file', f'{cwd}/{folder}/prototypes{i}.txt',
+                                    '--prot', f'{cwd}/{folder}/prototypes{i}.txt',
                                     '--jobconf', f'mapreduce.job.maps={nmaps}',
                                     '--jobconf', f'mapreduce.job.reduces={nreduces}',
                                     '--num-cores', str(nmaps)])
-        stopping_iteration, final_prototype = run_runner(mr_job, i)
+        stopping_iteration, final_prototype = run_runner(mr_job, i, folder)
         print(f'Time = {time() - start_time} seconds')
 
         write_prototype(final_prototype, f'{cwd}/prototypes-final.txt')
@@ -94,18 +96,18 @@ def perform_iterations(iterations, docs, nmaps, nreduces):
     return i
 
 
-def print_results(iteration):
+def print_results(iteration, folder):
     cwd = os.getcwd()
-    with open(f'{cwd}/prototypes{iteration}.txt', mode='r') as f:
+    with open(f'{cwd}/{folder}/prototypes{iteration}.txt', mode='r') as f:
         for l in f.readlines():
             print(l)
 
 
 def main(args):
-    copy_prototypes(args.prot)
+    copy_prototypes(args.prot, args.folder)
     num_its = perform_iterations(
-        args.iter, args.docs, args.nmaps, args.nreduces)
-    print_results(num_its)
+        args.iter, args.docs, args.nmaps, args.nreduces, args.folder)
+    print_results(num_its, args.folder)
 
 
 if __name__ == '__main__':
