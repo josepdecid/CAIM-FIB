@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 import sys
+from math import sqrt
 from mrjob.job import MRJob
 from mrjob.step import MRStep
 
@@ -31,6 +32,24 @@ class MRKmeansStep(MRJob):
 
         union = sum([p*p for (_, p) in prot]) + len(doc) - intersection
         return intersection / union
+
+    @staticmethod
+    def cosine_similarity(prot: List[Tuple[str, float]], doc: List[str]) -> float:
+        intersection = 0
+        i = 0
+        j = 0
+        while i < len(prot) and j < len(doc):
+            if prot[i][0] < doc[j]:
+                i += 1
+            elif prot[i][0] > doc[j]:
+                j += 1
+            else:
+                intersection += prot[i][1]
+                i += 1
+                j += 1
+
+        divisor = sqrt(sum([p*p for (_, p) in prot]))*sqrt(len(doc))
+        return intersection/divisor
 
     def configure_args(self):
         """
@@ -97,7 +116,8 @@ class MRKmeansStep(MRJob):
             for word in document[1]:
                 new_prototype[word] = 1 if word not in new_prototype else new_prototype[word] + 1
 
-        new_prototype = [(word, new_prototype[word] / len(new_prototype_docs)) for word in new_prototype]
+        new_prototype = [(word, new_prototype[word] /
+                          len(new_prototype_docs)) for word in new_prototype]
         sorted(new_prototype_docs)
         sorted(new_prototype, key=lambda e: e[0])
 
