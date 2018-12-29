@@ -26,8 +26,8 @@ def test_lsh_parameters(_k, _m):
 
 
 if __name__ == '__main__':
-    ks = list(range(10, 1001, 20))
-    ms = list(range(5, 201, 5))
+    ks = list(range(10, 101, 1))
+    ms = list(range(5, 10, 5))
 
     k_times = []
     k_csize = []

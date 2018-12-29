@@ -66,7 +66,6 @@ class LSH(object):
         :param i: # hash code (0 <= i < m)
         :return:
         """
-        """ get the i'th hash code of image im (0 <= i < m)"""
         pixels = img.flatten()
         row = self.hash_bits[i]
         code = ""
@@ -82,7 +81,6 @@ class LSH(object):
         :param img: image to look for matching candidates
         :return: set of matching images ids
         """
-        """ given image im, return matching candidates (well, the indices) """
         res = set()
         for i in range(self.m):
             code = self.hash_code(img, i)
