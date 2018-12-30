@@ -18,6 +18,18 @@ def timeit(method):
     return timed
 
 
+def hamming_distance(img1: np.ndarray, img2: np.ndarray) -> float:
+    arr_dist = abs(img1 - img2)
+    return sum(map(sum, arr_dist))
+
+
+def brute_force_search(idx: int) -> (float, int):
+    data = np.load('images.npy')
+    img = data[idx]
+    idx_distances = map(lambda i: (hamming_distance(img, data[i]), i), range(0, FIRST_TEST_IMAGE_INDEX))
+    return min(idx_distances, key=lambda p: p[0])
+
+
 class LSH(object):
     """
     Implementation of LSH for digits database in file 'images.npy'
@@ -75,7 +87,7 @@ class LSH(object):
             code += ('1' if num <= pixels[pix] else '0')
         return code
 
-    def candidates(self, img):
+    def candidates(self, img: np.ndarray) -> set:
         """
         Finds matching candidates for the given image
         :param img: image to look for matching candidates
@@ -88,23 +100,40 @@ class LSH(object):
                 res.update(self.hashes[i][code])
         return res
 
+    def search(self, img: np.ndarray, candidates: set) -> (float, int):
+        if len(candidates) == 0:
+            return None, None
+        else:
+            idx_distances = map(lambda i: (hamming_distance(img, self.data[i]), i), candidates)
+            return min(idx_distances, key=lambda p: p[0])
+
 
 @timeit
-def main(k, m):
-    print(f'Running lsh.py with parameters k = {k} and m = {m}')
+def main(k, m, hashing_mode):
+    mode = 'hashing' if hashing_mode else 'brute force'
+    print(f'Running lsh.py with parameters k = {k} and m = {m} (using {mode})')
 
-    lsh = LSH(k, m)
-
-    for i in range(FIRST_TEST_IMAGE_INDEX, FIRST_TEST_IMAGE_INDEX + 10):
-        image = lsh.data[i]
-        candidates = lsh.candidates(image)
-        print(f'There are {len(candidates)} candidates for image {i}')
+    if hashing_mode:
+        lsh = LSH(k, m)
+        for i in range(FIRST_TEST_IMAGE_INDEX, FIRST_TEST_IMAGE_INDEX + 10):
+            img = lsh.data[i]
+            candidates = lsh.candidates(img)
+            nearest_img_dist, nearest_img_idx = lsh.search(img, candidates)
+            if nearest_img_dist is None:
+                print(f'For image {i}, there are no candidates found with this k and m')
+            else:
+                print(f'For image {i}, the nearest image is {nearest_img_idx:>4} with a distance of {nearest_img_dist}')
+    else:
+        for i in range(FIRST_TEST_IMAGE_INDEX, FIRST_TEST_IMAGE_INDEX + 10):
+            nearest_img_dist, nearest_img_idx = brute_force_search(i)
+            print(f'For image {i}, the nearest image is {nearest_img_idx:>4} with a distance of {nearest_img_dist}')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-k', default=20, type=int)
     parser.add_argument('-m', default=5, type=int)
+    parser.add_argument('-hash', action='store_true')
     arguments = parser.parse_args()
 
-    main(k=arguments.k, m=arguments.m)
+    main(k=arguments.k, m=arguments.m, hashing_mode=arguments.hash)
