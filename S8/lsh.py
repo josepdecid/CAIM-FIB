@@ -19,8 +19,7 @@ def timeit(method):
 
 
 def hamming_distance(img1: np.ndarray, img2: np.ndarray) -> float:
-    arr_dist = abs(img1 - img2)
-    return sum(map(sum, arr_dist))
+    return sum(map(sum, abs(img1 - img2)))
 
 
 def brute_force_search(idx: int) -> (float, int):
