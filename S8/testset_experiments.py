@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from lsh import LSH, brute_force_search
 
 FIRST_TEST_IMAGE_INDEX = 1500
-MAX_INDEX = 1700
+MAX_INDEX = 1797
 
 K = 20
 M = 5
@@ -38,7 +38,7 @@ def time_brute_force(ub):
 
 
 if __name__ == '__main__':
-    test_sizes = list(range(10, MAX_INDEX - FIRST_TEST_IMAGE_INDEX))
+    test_sizes = list(range(10, MAX_INDEX - FIRST_TEST_IMAGE_INDEX, 5))
     lsh_times = []
     bf_times = []
 
@@ -53,9 +53,8 @@ if __name__ == '__main__':
 
     plt.plot(test_sizes, lsh_times, label='LSH')
     plt.plot(test_sizes, bf_times, label='Brute-force')
-    plt.title('Execution time evolution for test set size')
     plt.xlabel('Test set size')
     plt.ylabel('Execution time (s)')
     plt.legend()
-    plt.savefig('images/ts_time.png')
+    plt.savefig('images/ts_time.png', dpi=300)
     plt.show()
