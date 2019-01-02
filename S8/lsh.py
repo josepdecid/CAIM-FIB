@@ -18,11 +18,11 @@ def timeit(method):
     return timed
 
 
-def hamming_distance(img1: np.ndarray, img2: np.ndarray) -> float:
-    return sum(map(sum, abs(img1 - img2)))
+def hamming_distance(img1: np.ndarray, img2: np.ndarray) -> int:
+    return int(sum(map(sum, abs(img1 - img2))))
 
 
-def brute_force_search(idx: int) -> (float, int):
+def brute_force_search(idx: int) -> (int, int):
     data = np.load('images.npy')
     img = data[idx]
     idx_distances = map(lambda i: (hamming_distance(img, data[i]), i), range(0, FIRST_TEST_IMAGE_INDEX))
@@ -99,7 +99,7 @@ class LSH(object):
                 res.update(self.hashes[i][code])
         return res
 
-    def search(self, img: np.ndarray, candidates: set) -> (float, int):
+    def search(self, img: np.ndarray, candidates: set) -> (int, int):
         if len(candidates) == 0:
             return None, None
         else:
