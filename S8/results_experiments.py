@@ -46,7 +46,7 @@ def display_results(r):
 
 
 def text(t):
-    return '-' if t is None else t;
+    return '-' if t is None else t
 
 
 if __name__ == '__main__':
